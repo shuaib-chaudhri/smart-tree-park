@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Smart Tree Learning Park</title>
+
+<style>
+
+body{
+font-family:Arial;
+margin:0;
+background:#f4f6f7;
+}
+
+header{
+background:#2e7d32;
+color:white;
+padding:16px;
+text-align:center;
+font-size:20px;
+}
+
+.container{
+padding:15px;
+}
+
+.filters{
+display:flex;
+gap:10px;
+overflow-x:auto;
+margin-bottom:15px;
+}
+
+.filter-btn{
+padding:8px 14px;
+border:none;
+background:#e0e0e0;
+border-radius:20px;
+cursor:pointer;
+}
+
+.filter-btn.active{
+background:#2e7d32;
+color:white;
+}
+
+.tree-card{
+display:flex;
+align-items:center;
+background:white;
+padding:10px;
+margin-bottom:10px;
+border-radius:12px;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
+cursor:pointer;
+}
+
+.tree-card img{
+width:60px;
+height:60px;
+border-radius:10px;
+object-fit:cover;
+margin-right:12px;
+}
+
+.details{
+display:none;
+padding:15px;
+}
+
+.back{
+background:#2e7d32;
+color:white;
+border:none;
+padding:8px 12px;
+border-radius:6px;
+margin-bottom:10px;
+}
+
+.funfacts{
+background:#fff3e0;
+padding:12px;
+border-radius:10px;
+margin-top:15px;
+}
+
+.quiz{
+background:#e3f2fd;
+padding:12px;
+border-radius:10px;
+margin-top:15px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>🌳 Smart Tree Learning Park</header>
+
+<div class="container">
+
+<div id="listView">
+
+<div class="filters">
+<button class="filter-btn active" onclick="filterTrees('all')">All</button>
+<button class="filter-btn" onclick="filterTrees('sacred')">Sacred</button>
+<button class="filter-btn" onclick="filterTrees('medicinal')">Medicinal</button>
+<button class="filter-btn" onclick="filterTrees('fruit')">Fruit</button>
+<button class="filter-btn" onclick="filterTrees('forest')">Forest</button>
+</div>
+
+<div id="treeList"></div>
+
+</div>
+
+<div class="details" id="detailView">
+
+<button class="back" onclick="goBack()">⬅ Back</button>
+
+<h2 id="treeName"></h2>
+
+<img id="treeImage" style="width:100%;border-radius:10px;margin-bottom:10px;">
+
+<p id="treeInfo"></p>
+
+<div class="funfacts">
+<h3>🌿 Fun Facts</h3>
+<ul id="treeFacts"></ul>
+</div>
+
+<div class="quiz">
+
+<h3>🧠 Quiz</h3>
+
+<p id="quizQuestion"></p>
+
+<div id="quizOptions"></div>
+
+<button onclick="checkAnswer()">Submit</button>
+
+<p id="quizResult"></p>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const trees=[
+
+{
+name:"Banyan Tree",
+category:"sacred",
+image:"https://png.pngtree.com/png-clipart/20241129/original/pngtree-nice-banyan-tree-in-full-growth-png-image_17410944.png",
+info:"India's national tree that grows aerial roots forming multiple trunks.",
+facts:["Can live for centuries","Provides shelter for animals","Huge canopy"],
+quiz:{q:"What is India's national tree?",options:["Neem","Banyan","Mango"],answer:1}
+},
+
+{
+name:"Peepal Tree",
+category:"sacred",
+image:"https://static.toiimg.com/thumb/msid-115236504,width-1280,height-720,imgsize-242032,resizemode-6,overlay-toi_sw,pt-32,y_pad-40/photo.jpg",
+info:"Sacred tree known for religious importance.",
+facts:["Long lifespan","Provides shade","Important in ecosystems"],
+quiz:{q:"Peepal belongs to which genus?",options:["Ficus","Mangifera","Azadirachta"],answer:0}
+},
+
+{
+name:"Neem Tree",
+category:"medicinal",
+image:"https://manbhawannursery.in/cdn/shop/files/neem-plant-1000x1000.webp?v=1763267009",
+info:"Neem has strong antibacterial and medicinal properties.",
+facts:["Natural pesticide","Used in Ayurveda","Neem oil for skin"],
+quiz:{q:"Neem is mainly used for?",options:["Medicine","Decoration","Furniture"],answer:0}
+},
+
+{
+name:"Amla Tree",
+category:"medicinal",
+image:"https://www.hariththarang.com/cdn/shop/products/product-500x500_grande.jpg?v=1592397535",
+info:"Amla fruit is rich in Vitamin C.",
+facts:["Boosts immunity","Used in hair oils","Important Ayurvedic herb"],
+quiz:{q:"Amla contains high?",options:["Vitamin C","Protein","Fat"],answer:0}
+},
+
+{
+name:"Tulsi Plant",
+category:"medicinal",
+image:"https://cdn.britannica.com/87/207887-050-F48CB55D/basil.jpg",
+info:"Sacred medicinal plant used widely in India.",
+facts:["Improves immunity","Used in herbal tea","Good for cold"],
+quiz:{q:"Tulsi is also called?",options:["Holy Basil","Mint","Rose"],answer:0}
+},
+
+{
+name:"Mango Tree",
+category:"fruit",
+image:"https://upload.wikimedia.org/wikipedia/commons/9/90/Hapus_Mango.jpg",
+info:"Produces mangoes known as the king of fruits.",
+facts:["Over 1000 varieties","Rich in vitamins","Popular tropical fruit"],
+quiz:{q:"Mango is called?",options:["King of fruits","Queen of fruits","Forest fruit"],answer:0}
+},
+
+{
+name:"Coconut Tree",
+category:"fruit",
+image:"https://www.shutterstock.com/image-photo/pati-indonesian-june-29-2025-600nw-2647394843.jpg",
+info:"Known as the tree of life because every part is useful.",
+facts:["Used in food","Coconut oil","Leaves used for roofs"],
+quiz:{q:"Coconut grows mostly in?",options:["Mountains","Coastal areas","Desert"],answer:1}
+},
+
+{
+name:"Guava Tree",
+category:"fruit",
+image:"https://m.media-amazon.com/images/I/61npPM+W07L._AC_UF1000,1000_QL80_.jpg",
+info:"Guava fruits are rich in vitamin C and fiber.",
+facts:["Improves digestion","Popular tropical fruit","Used in juices"],
+quiz:{q:"Guava contains high?",options:["Vitamin C","Fat","Protein"],answer:0}
+},
+
+{
+name:"Apple Tree",
+category:"fruit",
+image:"https://m.media-amazon.com/images/I/61g7abovGOL._AC_UF1000,1000_QL80_.jpg",
+info:"Apple trees grow mainly in temperate regions.",
+facts:["Thousands of varieties","Rich in fiber","Popular fruit"],
+quiz:{q:"Apple grows best in?",options:["Cold climate","Desert","Ocean"],answer:0}
+},
+
+{
+name:"Teak Tree",
+category:"forest",
+image:"https://m.media-amazon.com/images/I/611aZqUFtPL._AC_UF1000,1000_QL80_.jpg",
+info:"Teak wood is famous for durability.",
+facts:["Resistant to termites","Used in furniture","Used in ships"],
+quiz:{q:"Teak wood used for?",options:["Furniture","Food","Medicine"],answer:0}
+},
+
+{
+name:"Sal Tree",
+category:"forest",
+image:"https://www.tigersafari.net/wp-content/uploads/2020/05/sal.jpg",
+info:"Important forest tree in India.",
+facts:["Hard wood","Used in construction","Important for forests"],
+quiz:{q:"Sal tree found mainly in?",options:["Forest","Ocean","Desert"],answer:0}
+},
+
+{
+name:"Pine Tree",
+category:"forest",
+image:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRvKNyD8aWS1-NJ8Bx8RSk1Rz_7NxcY6OHDdg&s",
+info:"Evergreen trees found in cold mountains.",
+facts:["Produces cones","Used for timber","Evergreen tree"],
+quiz:{q:"Pine grows in?",options:["Cold regions","Desert","Swamp"],answer:0}
+},
+
+{
+name:"Oak Tree",
+category:"forest",
+image:"https://treenewal.com/wp-content/uploads/2020/11/oak-tree-care.png",
+info:"Strong hardwood tree supporting wildlife.",
+facts:["Long lifespan","Strong wood","Large canopy"],
+quiz:{q:"Oak wood is?",options:["Hardwood","Softwood","Plastic"],answer:0}
+},
+
+{
+name:"Baobab Tree",
+category:"forest",
+image:"https://images.squarespace-cdn.com/content/v1/562cfd50e4b0db46045fb676/42772d88-1364-4712-87b7-a43b8d5c5598/**funnybee-bop-645fDJa1GJU-unsplash-2.jpg",
+info:"Massive tree storing water in trunk.",
+facts:["Very thick trunk","Can live 1000 years","Called tree of life"],
+quiz:{q:"Baobab stores?",options:["Water","Oil","Gas"],answer:0}
+},
+
+{
+name:"Ash Tree",
+category:"forest",
+image:"https://eab.russell.wisc.edu/wp-content/uploads/sites/245/2018/09/Green-Ash-Paul-Drobot.jpg",
+info:"Ash wood used in sports equipment.",
+facts:["Used in bats","Tall tree","Strong wood"],
+quiz:{q:"Ash wood used for?",options:["Sports equipment","Food","Medicine"],answer:0}
+}
+
+]
+
+let currentTree=null
+
+function loadTrees(category="all"){
+
+const list=document.getElementById("treeList")
+list.innerHTML=""
+
+trees.forEach((tree,i)=>{
+
+if(category==="all"||tree.category===category){
+
+list.innerHTML+=`
+<div class="tree-card" onclick="showTree(${i})">
+<img src="${tree.image}">
+<div>
+<b>${tree.name}</b><br>
+<small>${tree.category}</small>
+</div>
+</div>
+`
+
+}
+
+})
+
+}
+
+function filterTrees(category){
+loadTrees(category)
+}
+
+function showTree(index){
+
+currentTree=trees[index]
+
+document.getElementById("listView").style.display="none"
+document.getElementById("detailView").style.display="block"
+
+document.getElementById("treeName").innerText=currentTree.name
+document.getElementById("treeImage").src=currentTree.image
+document.getElementById("treeInfo").innerText=currentTree.info
+
+let facts=""
+currentTree.facts.forEach(f=>facts+=`<li>${f}</li>`)
+document.getElementById("treeFacts").innerHTML=facts
+
+document.getElementById("quizQuestion").innerText=currentTree.quiz.q
+
+let opts=""
+currentTree.quiz.options.forEach((o,i)=>{
+opts+=`<input type="radio" name="quiz" value="${i}"> ${o}<br>`
+})
+
+document.getElementById("quizOptions").innerHTML=opts
+
+}
+
+function goBack(){
+document.getElementById("detailView").style.display="none"
+document.getElementById("listView").style.display="block"
+}
+
+function checkAnswer(){
+
+let selected=document.querySelector('input[name="quiz"]:checked')
+
+if(!selected){
+alert("Select answer")
+return
+}
+
+if(parseInt(selected.value)===currentTree.quiz.answer){
+document.getElementById("quizResult").innerText="✅ Correct!"
+}else{
+document.getElementById("quizResult").innerText="❌ Try again!"
+}
+
+}
+
+loadTrees()
+
+</script>
+
+</body>
+</html>
